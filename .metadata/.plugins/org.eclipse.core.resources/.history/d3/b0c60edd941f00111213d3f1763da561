@@ -1,0 +1,9 @@
+package com.parth.urlshortener.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.parth.urlshortener.entity.ClickAnalytics;
+
+public interface ClickAnalyticsRepository extends JpaRepository<ClickAnalytics, Long> {
+
+}

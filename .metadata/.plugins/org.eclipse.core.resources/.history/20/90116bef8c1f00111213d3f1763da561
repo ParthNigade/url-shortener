@@ -1,0 +1,8 @@
+package com.parth.urlshortener.entity;
+
+
+@Entity
+@Data
+public class Url {
+
+}

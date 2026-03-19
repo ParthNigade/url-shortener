@@ -1,0 +1,23 @@
+package com.parth.urlshortener.dto;
+
+import java.util.List;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class AnalyticsResponse {
+
+	private String shortCode;
+	private Long totalClicks;
+	private List <ClickDetail> recentClicks;
+	
+	@Data
+	@Builder
+	public static class ClickDetial{
+		
+	}
+	
+	
+}

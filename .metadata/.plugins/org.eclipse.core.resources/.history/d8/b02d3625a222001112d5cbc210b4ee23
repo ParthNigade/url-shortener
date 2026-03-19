@@ -1,0 +1,47 @@
+package com.parth.urlshortener.service;
+
+import org.springframework.stereotype.Service;
+
+import com.parth.urlshortener.dto.ShortenRequest;
+import com.parth.urlshortener.dto.ShortenResponse;
+import com.parth.urlshortener.dto.UrlStatsResponse;
+import com.parth.urlshortener.repository.ClickAnalyticsRepository;
+import com.parth.urlshortener.repository.UrlRepository;
+import com.parth.urlshortener.util.Base62Util;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class UrlServiceImpl implements UrlService {
+
+	private final UrlRepository urlRepository;
+	private final ClickAnalyticsRepository analyticsRepo;
+	private final CacheService cacheService;
+	private final Base62Util base62Util;
+	
+	@Override
+	public ShortenResponse shortenUrl(ShortenRequest request) {
+		// Implementation for shortening URL
+	}
+	
+	@Override
+	public String resolveUrl(String shortCode, HttpServletRequest request) {
+		// Implementation for resolving short code to original URL
+	}
+	
+	@Override
+	public UrlStatsResponse getUrlStats(String shortCode) {
+		// Implementation for getting URL statistics
+	}
+	
+	@Override
+	public void deactivateUrl(String shortCode) {
+		// Implementation for deactivating a short URL
+	}
+
+	
+}

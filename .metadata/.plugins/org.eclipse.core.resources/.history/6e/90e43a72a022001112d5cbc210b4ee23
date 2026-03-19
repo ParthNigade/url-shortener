@@ -1,0 +1,9 @@
+package com.parth.urlshortener.service;
+
+import com.parth.urlshortener.dto.ShortenRequest;
+import com.parth.urlshortener.dto.ShortenResponse;
+
+public interface UrlService {
+
+	ShortenResponse shortenUrl(ShortenRequest request);
+}

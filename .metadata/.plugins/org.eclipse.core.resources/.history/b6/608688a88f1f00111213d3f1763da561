@@ -1,0 +1,5 @@
+package com.parth.urlshortener.entity;
+
+public class ClickAnalytics {
+
+}

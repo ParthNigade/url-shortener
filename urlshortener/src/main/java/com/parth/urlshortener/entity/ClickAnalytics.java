@@ -1,0 +1,41 @@
+package com.parth.urlshortener.entity;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "click_analytics")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ClickAnalytics {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	
+	@Column(nullable = false)
+	private Long urlId;
+	
+	private LocalDateTime clickedAt;
+	private String ipAddress;
+	private String referer;
+	private String userAgent;
+	
+	@PrePersist
+	protected void onCreate() {
+		clickedAt = LocalDateTime.now();
+	}
+}

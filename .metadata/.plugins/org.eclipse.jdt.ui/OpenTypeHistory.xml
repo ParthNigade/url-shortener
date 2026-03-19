@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<typeInfoHistroy>
+    <typeInfo handle="=urlshortener/C:\/Users\/Parth PC\/.m2\/repository\/org\/springframework\/data\/spring-data-jpa\/4.0.3\/spring-data-jpa-4.0.3.jar=/maven.pomderived=/true=/=/maven.groupId=/org.springframework.data=/=/maven.artifactId=/spring-data-jpa=/=/maven.version=/4.0.3=/=/maven.scope=/compile=/=/maven.pomderived=/true=/&lt;org.springframework.data.jpa.repository(JpaRepository.class[JpaRepository" modifiers="1537" timestamp="1773475117681"/>
+    <typeInfo handle="=urlshortener/C:\/Program Files\/Java\/jdk-21\/lib\/jrt-fs.jar`java.base=/javadoc_location=/https:\/\/docs.oracle.com\/en\/java\/javase\/21\/docs\/api\/=/=/maven.pomderived=/true=/&lt;java.lang(RuntimeException.class[RuntimeException" modifiers="33" timestamp="1758971455963"/>
+    <typeInfo handle="=urlshortener/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.parth.urlshortener.service{AnalyticsService.java[AnalyticsService" modifiers="513" timestamp="1773822753666"/>
+</typeInfoHistroy>

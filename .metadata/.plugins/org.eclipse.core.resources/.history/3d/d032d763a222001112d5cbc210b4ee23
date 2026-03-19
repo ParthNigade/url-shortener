@@ -1,0 +1,181 @@
+package com.parth.urlshortener.service;
+
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.parth.urlshortener.dto.ShortenRequest;
+import com.parth.urlshortener.dto.ShortenResponse;
+import com.parth.urlshortener.dto.UrlStatsResponse;
+import com.parth.urlshortener.entity.ClickAnalytics;
+import com.parth.urlshortener.entity.Url;
+import com.parth.urlshortener.repository.ClickAnalyticsRepository;
+import com.parth.urlshortener.repository.UrlRepository;
+import com.parth.urlshortener.util.Base62Util;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class UrlServiceImpl implements UrlService {
+
+	private final UrlRepository urlRepository;
+	private final ClickAnalyticsRepository analyticsRepo;
+	private final CacheService cacheService;
+	private final Base62Util base62Util;
+	
+	@Value("${app.base-url}")
+	private String baseUrl;
+	
+	@Value("${app.short-code-length}")
+	private int codeLength;
+	
+	@Value("${app.default-expiry-days}")
+	private int defaultExpiryDays;
+
+	@Override
+	@Transactional
+	 public ShortenResponse shortenUrl(ShortenRequest request) {
+        String shortCode;
+
+        // Check if user wants a custom alias
+        if (request.getCustomAlias() != null && !request.getCustomAlias().isBlank()) {
+            shortCode = request.getCustomAlias();
+            if (urlRepository.existsByShortCode(shortCode)) {
+                throw new RuntimeException("Custom alias already taken!");
+            }
+        } else {
+            // Generate a unique random code
+            shortCode = generateUniqueCode();
+        }
+
+        int expiry = request.getExpiresInDays() != null
+                ? request.getExpiresInDays() : defaultExpiryDays;
+
+        Url url = Url.builder()
+                .shortCode(shortCode)
+                .originalUrl(request.getOriginalUrl())
+                .expiresAt(LocalDateTime.now().plusDays(expiry))
+                .build();
+
+        urlRepository.save(url);
+
+        // Cache the URL in Redis for fast lookups
+        cacheService.cacheUrl(shortCode, url.getOriginalUrl());
+
+        return ShortenResponse.builder()
+                .shortCode(shortCode)
+                .shortUrl(baseUrl + "/" + shortCode)
+                .originalUrl(url.getOriginalUrl())
+                .createdAt(url.getCreatedAt())
+                .expiresAt(url.getExpiresAt())
+                .build();
+    }
+
+    @Override
+    public String resolveUrl(String shortCode, HttpServletRequest request) {
+        // STEP 1: Check Redis cache first (fast path)
+        String cached = cacheService.getCachedUrl(shortCode);
+        if (cached != null) {
+            log.info("Cache HIT for shortCode: {}", shortCode);
+            trackClickAsync(shortCode, request);
+            return cached;
+        }
+
+        // STEP 2: Cache miss — fall back to MySQL
+        log.info("Cache MISS for shortCode: {}, querying DB", shortCode);
+        Url url = urlRepository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+
+        // Check if URL is still active
+        if (!url.getIsActive()) {
+            throw new UrlExpiredException(shortCode);
+        }
+
+        // Check if URL has expired
+        if (url.getExpiresAt() != null && url.getExpiresAt().isBefore(LocalDateTime.now())) {
+            url.setIsActive(false);
+            urlRepository.save(url);
+            cacheService.evictCache(shortCode);
+            throw new UrlExpiredException(shortCode);
+        }
+
+        // STEP 3: Populate cache for future lookups & track click
+        cacheService.cacheUrl(shortCode, url.getOriginalUrl());
+        trackClickAsync(shortCode, request);
+
+        return url.getOriginalUrl();
+    }
+
+    @Override
+    public UrlStatsResponse getUrlStats(String shortCode) {
+        Url url = urlRepository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+
+        return UrlStatsResponse.builder()
+                .shortCode(url.getShortCode())
+                .originalUrl(url.getOriginalUrl())
+                .totalClicks(url.getClickCount())
+                .createdAt(url.getCreatedAt())
+                .expiresAt(url.getExpiresAt())
+                .isActive(url.getIsActive())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void deactivateUrl(String shortCode) {
+        Url url = urlRepository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+        url.setIsActive(false);
+        urlRepository.save(url);
+        cacheService.evictCache(shortCode);
+    }
+
+    /**
+     * Collision-safe code generation.
+     * Generates a random Base62 code and checks DB for uniqueness.
+     * Retries up to 10 times before failing.
+     */
+    private String generateUniqueCode() {
+        String code;
+        int attempts = 0;
+        do {
+            code = base62Util.generateRandomCode(codeLength);
+            attempts++;
+            if (attempts > 10) {
+                throw new RuntimeException("Failed to generate unique short code after 10 attempts");
+            }
+        } while (urlRepository.existsByShortCode(code));
+        return code;
+    }
+
+    /**
+     * Async click tracking — does NOT block the redirect response.
+     * Records IP, User-Agent, Referer, and timestamp.
+     */
+    @Async
+    protected void trackClickAsync(String shortCode, HttpServletRequest req) {
+        try {
+            Url url = urlRepository.findByShortCode(shortCode).orElse(null);
+            if (url == null) return;
+
+            urlRepository.incrementClickCount(shortCode);
+
+            analyticsRepo.save(ClickAnalytics.builder()
+                    .urlId(url.getId())
+                    .ipAddress(req.getRemoteAddr())
+                    .userAgent(req.getHeader("User-Agent"))
+                    .referer(req.getHeader("Referer"))
+                    .build());
+        } catch (Exception e) {
+            log.error("Error tracking click for {}: {}", shortCode, e.getMessage());
+        }
+    }
+}

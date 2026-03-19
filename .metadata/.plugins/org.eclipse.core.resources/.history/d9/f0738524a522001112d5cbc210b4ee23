@@ -1,0 +1,13 @@
+package com.parth.urlshortener.service;
+
+import com.parth.urlshortener.dto.AnalyticsResponse;
+
+public class AnalyticsServiceImpl implements AnalyticsService {
+
+	@Override
+	public AnalyticsResponse getDetailedAnalytics(String shortCode) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

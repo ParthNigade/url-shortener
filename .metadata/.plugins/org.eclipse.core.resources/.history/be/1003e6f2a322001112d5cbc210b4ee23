@@ -1,0 +1,5 @@
+package com.parth.urlshortener.controller;
+
+public class AnalyticsController {
+
+}

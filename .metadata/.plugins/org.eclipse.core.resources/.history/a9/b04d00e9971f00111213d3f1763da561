@@ -1,0 +1,9 @@
+package com.parth.urlshortener.util;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Base62Util {
+	
+	private static final String BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+}

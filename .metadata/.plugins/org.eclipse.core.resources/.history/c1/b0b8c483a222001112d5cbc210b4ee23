@@ -1,0 +1,5 @@
+package com.parth.urlshortener.exception;
+
+public class UrlNotFoundException {
+
+}

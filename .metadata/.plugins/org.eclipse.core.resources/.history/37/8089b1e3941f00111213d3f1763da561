@@ -1,0 +1,12 @@
+package com.parth.urlshortener.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.parth.urlshortener.entity.ClickAnalytics;
+
+public interface ClickAnalyticsRepository extends JpaRepository<ClickAnalytics, Long> {
+	List<ClickAnalytics> findByUrlIdOrderByClickedAtDesc(Long urlId);
+	long countByUrlId(Long urlId);
+}
