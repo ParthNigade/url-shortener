@@ -4364,3 +4364,9 @@ java.lang.NullPointerException: Cannot invoke "com.microsoft.copilot.eclipse.cor
 
 !ENTRY org.eclipse.lsp4e 1 0 2026-03-19 13:01:36.114
 !MESSAGE [Info]	[copilotModels] Filtering out model with only /responses endpoint: gpt-5.3-codex
+
+!ENTRY com.microsoft.copilot.eclipse 1 0 2026-03-20 15:43:28.312
+!MESSAGE [Info] Document is null for editor: UrlshortenerApplication.java
+
+!ENTRY com.microsoft.copilot.eclipse 1 0 2026-03-20 15:43:28.314
+!MESSAGE [Info] Completion handler is refreshed for the document: file:///D:/Projects/urlShortner/urlshortener/src/main/java/com/parth/urlshortener/UrlshortenerApplication.java
